@@ -17,6 +17,7 @@ int main(void) {
     bool operator_found = false;  // Is the operator found in the problem
     char operator;          // The operator of the problem
     int number_found = 0;   // Keeps track of the number of characters found in the problem
+    bool two_decimals = false;    // Tracks if a user entered too many decimals in the problem
     float op1 = 0;          // The left side number as a float
     float op2 = 0;          // The right side number as a float
     float answer;           // The solution to the math problem
@@ -33,9 +34,19 @@ int main(void) {
     // TO-DO: Do a check that the user entered a valid math problem
     for (int i = 0; i < problem_length && problem[i] != '\0'; ++i) {
         // Check if the first number is actually a number or a decimal. Once operator has been found, move on.
-        if ((problem[i] >= '0' && problem[i] <= '9' || problem[i] == '.') && operator_found == false) {
+        if ((problem[i] >= '0' && problem[i] <= '9') && operator_found == false) {
             operand1[i] = problem[i];
             ++number_found;
+        }
+        else if (problem[i] == '.' && operator_found == false) {
+            if (!two_decimals) {
+                operand1[i] = problem[i];
+                ++number_found;
+                two_decimals = true;
+            } else {
+                printf("You entered too many decimals in the first operand.\n");
+                return 1;
+            }
         // Increase number found for every character in to problem up until the second operand
         } else if (problem[i] == ' ') {
             ++number_found;
@@ -44,12 +55,23 @@ int main(void) {
         } else if (problem[i] == '+' || problem[i] == '-' || problem[i] == '*' || problem[i] == '/') {
             operator = problem[i];
             operator_found = true;
+            two_decimals = false;
             ++number_found;
         // Assemble the second operand as a string using number found to index the character array.
-        } else {
+        } else if ((problem[i] >= '0' && problem[i] <= '9') && operator_found == true) {
             operand2[i - number_found] = problem[i];
+        } else if (problem[i] == '.' && operator_found == true) {
+            if (!two_decimals) {
+                operand2[i - number_found] = problem[i];
+                two_decimals = true;
+            } else {
+                printf("You entered too many decimals in the second operand.\n");
+                return 1;
+            }
+        } else {
+            printf("You entered an invalid character.\n");
+            return 1;
         }
-        
     }
 
     // Convert both operand strings into floats
@@ -77,6 +99,6 @@ int main(void) {
 
     // Show the answer.
     printf("%.2f %c %.2f = %.2f\n", op1, operator, op2, answer);
-    
+
     return 0;
 }
